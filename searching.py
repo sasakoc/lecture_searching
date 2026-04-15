@@ -49,6 +49,34 @@ def pattern_search(sequence, pattern):
     return positions
 
 
+def binary_search(searched_data, searched_number):
+    low = 0
+    high = len(searched_data) - 1
+
+    while low <= high:
+        mid = (low + high) // 2
+        if searched_data[mid] == searched_number:
+            return mid
+        elif searched_data[mid] < searched_number:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return None
+
+
+def main():
+    target = 72
+    ordered_list = read_data('sequential.json', 'ordered_numbers')
+
+    if ordered_list is not None:
+        result_index = binary_search(ordered_list, target)
+
+        if result_index is not None:
+            print(f"Číslo {target} bylo nalezeno na indexu {result_index}.")
+        else:
+            print(f"Číslo {target} se v seznamu nenachází.")
+
+
 def main():
     unordered_data = read_data('sequential.json', 'unordered_numbers')
     if unordered_data:
