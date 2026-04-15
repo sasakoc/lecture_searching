@@ -3,28 +3,70 @@ import json
 
 
 def read_data(file_name, field):
-    """
-    Reads a JSON file and returns data for a given field.
-
-    Args:
-        file_name (str): Name of the JSON file.
-        field (str): Key to retrieve from the JSON data.
-            Must be one of: 'unordered_numbers', 'ordered_numbers' or 'dna_sequence'.
-
-    Returns:
-        list | str | None:
-            - list: If data retrieved by the selected field contains numeric data.
-            - str: If field is 'dna_sequence'.
-            - None: If the field is not supported.
-    """
-    # get current working directory path
     cwd_path = Path.cwd()
-    
     file_path = cwd_path / file_name
+
+    try:
+        with open(file_path, mode='r', encoding='utf-8') as file:
+            data = json.load(file)
+            return data.get(field)
+    except FileNotFoundError:
+        print(f"Chyba: Soubor {file_name} nebyl nalezen.")
+        return None
+
+
+def linear_search(searched_data, searched_number):
+    for index, value in enumerate(searched_data):
+        if value == searched_number:
+            return index
+    return -1
+
+
+def binary_search(searched_data, searched_number):
+    low = 0
+    high = len(searched_data) - 1
+
+    while low <= high:
+        mid = (low + high) // 2
+        guess = searched_data[mid]
+
+        if guess == searched_number:
+            return mid
+        if guess > searched_number:
+            high = mid - 1
+        else:
+            low = mid + 1
+    return -1
+
+
+def pattern_search(sequence, pattern):
+    positions = []
+    m = len(pattern)
+    n = len(sequence)
+    for i in range(n - m + 1):
+        if sequence[i: i + m] == pattern:
+            positions.append(i)
+    return positions
 
 
 def main():
-    pass
+    unordered_data = read_data('sequential.json', 'unordered_numbers')
+    if unordered_data:
+        target = 31
+        idx = linear_search(unordered_data, target)
+        print(f"Lineární vyhledávání: Číslo {target} nalezeno na indexu {idx}")
+
+    ordered_data = read_data('sequential.json', 'ordered_numbers')
+    if ordered_data:
+        target = 70
+        idx = binary_search(ordered_data, target)
+        print(f"Binární vyhledávání: Číslo {target} nalezeno na indexu {idx}")
+
+    dna_seq = read_data('sequential.json', 'dna_sequence')
+    if dna_seq:
+        pattern = "AGG"
+        found_positions = pattern_search(dna_seq, pattern)
+        print(f"Vyhledávání vzoru '{pattern}': Nalezeno na pozicích {found_positions}")
 
 
 if __name__ == "__main__":
