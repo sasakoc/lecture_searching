@@ -1,6 +1,9 @@
 from pathlib import Path
 import json
-
+import time
+import matplotlib.pyplot as plt
+from generators import ordered_sequence
+from searching import linear_search, binary_search
 
 def read_data(file_name, field):
     cwd_path = Path.cwd()
@@ -64,6 +67,45 @@ def binary_search(searched_data, searched_number):
     return None
 
 
+def benchmark_search():
+    sizes = [100, 500, 1000, 5000, 10000]
+    repetitions = 1000
+
+    linear_results = []
+    binary_results = []
+    set_results = []
+
+    for n in sizes:
+        data_list = ordered_sequence(max_len=n)
+        data_set = set(data_list)
+        target = 2000
+
+        t0 = time.perf_counter()
+        for _ in range(repetitions):
+            linear_search(data_list, target)
+        linear_results.append((time.perf_counter() - t0) / repetitions)
+        t0 = time.perf_counter()
+        for _ in range(repetitions):
+            binary_search(data_list, target)
+        binary_results.append((time.perf_counter() - t0) / repetitions)
+        t0 = time.perf_counter()
+        for _ in range(repetitions):
+            _ = target in data_set
+        set_results.append((time.perf_counter() - t0) / repetitions)
+
+    plt.plot(sizes, linear_results, label='Lineární vyhledávání $O(n)$', marker='o')
+    plt.plot(sizes, binary_results, label='Binární vyhledávání $O(\log n)$', marker='s')
+    plt.plot(sizes, set_results, label='Množina (set) $O(1)$', marker='^')
+
+    plt.xlabel('Velikost vstupu ($n$)')
+    plt.ylabel('Průměrný čas [s]')
+    plt.title('Porovnání efektivity vyhledávacích algoritmů')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('search_benchmark.png')
+    print("Graf byl uložen jako 'search_benchmark.png'.")
+
+
 def main():
     target = 72
     ordered_list = read_data('sequential.json', 'ordered_numbers')
@@ -95,7 +137,6 @@ def main():
         pattern = "AGG"
         found_positions = pattern_search(dna_seq, pattern)
         print(f"Vyhledávání vzoru '{pattern}': Nalezeno na pozicích {found_positions}")
-
 
 if __name__ == "__main__":
     main()
